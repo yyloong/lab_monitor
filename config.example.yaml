@@ -1,0 +1,47 @@
+feishu:
+  webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/<YOUR_WEBHOOK_TOKEN>"
+  app_id: ""        # 可选：飞书自建应用 app_id，填写后可在消息中直接展示图表图片
+  app_secret: ""    # 可选：飞书自建应用 app_secret
+
+llm:
+  provider: "openai"        # openai / anthropic / zhipu
+  api_key: "<YOUR_API_KEY>"
+  model: "gpt-4o"
+  base_url: ""              # 留空使用官方默认地址，或填写自定义代理地址
+  vision_enabled: true      # true: 发送图表图片给模型；false: 仅发送文字指标
+  max_input_chars: 4000     # 输入文本超过此字符数时截断，0 表示不限制
+  max_tokens: 600           # 模型最大输出 token 数
+
+wandb:
+  entity: ""                # 留空使用默认 entity，需提前执行 `wandb login`
+
+experiments:
+  - name: "example_experiment"
+    wandb_project: "your_wandb_project"
+    wandb_run_id: ""        # 精确匹配 wandb 内部 ID（优先级最高）
+    wandb_run_name: ""      # 按 run name 包含匹配（比 run_id 直观，留空则自动选最新 running run）
+    wandb_ignore_missing: false  # true: 找不到 run 时静默返回；false: 抛出异常便于调试
+    wandb_metric_keys:           # 指定关注的核心指标，留空则自动选取全部
+      - "train/loss"
+      - "eval/reward_score"
+    process_pids: []             # 直接指定进程 PID（优先于关键词，留空则用关键词扫描）
+    process_keywords:
+      - "your.trainer.module"
+    process_cwd: ""              # 进程工作目录过滤，留空不过滤
+    process_extra_keywords: []   # 命令行中必须同时包含的额外关键词（AND）
+    gpu_ids: []                  # 留空则根据进程自动识别占用的 GPU
+    gpu_alert_thresholds:
+      memory_percent: 95
+      temperature: 85
+      utilization: 1             # 低于此值视为 GPU 空闲异常（训练中）
+    cpu_alert_thresholds:
+      memory_percent: 90         # 系统内存超过此值告警
+      cpu_percent: 95            # 全局 CPU 超过此值告警
+
+schedule:
+  gpu_interval_seconds: 60
+  process_interval_seconds: 60
+  wandb_interval_seconds: 30
+  wandb_step_check: true         # 检测到新 step 时立即触发 LLM 分析
+  alert_cooldown_minutes: 10     # 同类告警最小间隔，防止频繁推送
+  gpu_report_interval_minutes: 30  # 定期 GPU 状态报告间隔，0 表示仅告警时发送
