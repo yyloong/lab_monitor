@@ -22,6 +22,7 @@ class LLMConfig:
     model: str = "gpt-4o"
     base_url: str = ""
     vision_enabled: bool = True
+    enabled: bool = True          # false: 禁用 LLM 分析，仅推送图表
     max_input_chars: int = 4000   # 输入文本超过此长度时截断，0 表示不限制
     max_tokens: int = 600         # 模型最大输出 token 数
 

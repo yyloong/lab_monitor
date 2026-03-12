@@ -8,6 +8,7 @@ llm:
   api_key: "<YOUR_API_KEY>"
   model: "gpt-4o"
   base_url: ""              # 留空使用官方默认地址，或填写自定义代理地址
+  enabled: true             # false: 禁用 LLM 分析，仅推送训练曲线图表
   vision_enabled: true      # true: 发送图表图片给模型；false: 仅发送文字指标
   max_input_chars: 4000     # 输入文本超过此字符数时截断，0 表示不限制
   max_tokens: 600           # 模型最大输出 token 数

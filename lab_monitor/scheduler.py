@@ -45,7 +45,7 @@ class MonitorScheduler:
             vision_enabled=config.llm.vision_enabled,
             max_input_chars=config.llm.max_input_chars,
             max_tokens=config.llm.max_tokens,
-        )
+        ) if config.llm.enabled else None
         # APScheduler：线程池执行，实验间互不阻塞
         executors = {"default": ThreadPoolExecutor(max_workers=len(config.experiments) * 3 + 2)}
         self._scheduler = BackgroundScheduler(executors=executors, timezone="Asia/Shanghai")
@@ -278,7 +278,7 @@ class MonitorScheduler:
     def _trigger_llm_analysis(
         self, exp: "ExperimentConfig", snapshot
     ) -> None:
-        """拉取历史数据、绘图、调用 LLM 分析并推送。"""
+        """拉取历史数据、绘图，若 LLM 已启用则调用分析并推送，否则仅推送图表。"""
         try:
             metric_keys = exp.wandb_metric_keys or None
             df = self._wandb_monitor.get_history_df(
@@ -292,6 +292,17 @@ class MonitorScheduler:
                 metric_keys=metric_keys,
                 title=f"{exp.name} — step {snapshot.latest_step}",
             )
+
+            if not self._cfg.llm.enabled:
+                # LLM 已禁用，仅推送图表
+                self._notifier.send_wandb_analysis(
+                    exp_name=exp.name,
+                    step=snapshot.latest_step,
+                    analysis_text="（LLM 分析已禁用，仅展示训练曲线）",
+                    chart_buf=chart_buf,
+                )
+                return
+
             analysis = self._analyzer.analyze(snapshot, chart_buf)
             analysis_text = analysis.text
             summary = analysis.summary_line()
