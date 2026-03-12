@@ -43,5 +43,6 @@ schedule:
   process_interval_seconds: 60
   wandb_interval_seconds: 30
   wandb_step_check: true         # 检测到新 step 时立即触发 LLM 分析
+  wandb_step_check_interval: 1   # 每隔多少个 step 触发一次 LLM 分析（1=每步，10=每10步）
   alert_cooldown_minutes: 10     # 同类告警最小间隔，防止频繁推送
   gpu_report_interval_minutes: 30  # 定期 GPU 状态报告间隔，0 表示仅告警时发送

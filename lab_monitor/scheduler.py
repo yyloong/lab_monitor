@@ -262,7 +262,8 @@ class MonitorScheduler:
 
             # 新 step 触发分析
             step_check = self._cfg.schedule.wandb_step_check
-            if step_check and self._wandb_monitor.has_new_step(exp.name, snapshot):
+            step_interval = self._cfg.schedule.wandb_step_check_interval
+            if step_check and self._wandb_monitor.has_new_step(exp.name, snapshot, step_interval=step_interval):
                 logger.info(
                     "[%s] New step detected (%d), triggering LLM analysis.",
                     exp.name,
@@ -384,7 +385,8 @@ class MonitorScheduler:
                 )
                 if snapshot:
                     # 预置 last_step，避免启动后的第一次定时检查重复触发分析
-                    self._wandb_monitor.has_new_step(exp.name, snapshot)
+                    step_interval = self._cfg.schedule.wandb_step_check_interval
+                    self._wandb_monitor.has_new_step(exp.name, snapshot, step_interval=step_interval)
                     state_icon = "🟢" if snapshot.state == "running" else "🟡"
                     lines.append(
                         f"{state_icon} **WandB**: run `{snapshot.run_name}`  "

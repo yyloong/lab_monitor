@@ -54,6 +54,8 @@ class WandbMonitor:
             ) from exc
         # exp_name -> last known step
         self._last_steps: dict[str, int] = {}
+        # exp_name -> last step that triggered LLM analysis
+        self._last_analysis_steps: dict[str, int] = {}
 
     def get_snapshot(
         self, project: str, run_id: str = "", entity: str = "",
@@ -134,11 +136,21 @@ class WandbMonitor:
         except Exception as exc:
             raise RuntimeError(f"获取 wandb run 数据失败: {exc}") from exc
 
-    def has_new_step(self, exp_name: str, snapshot: RunSnapshot) -> bool:
-        """判断此次快照是否出现了新 step（相比上次检查）。"""
+    def has_new_step(self, exp_name: str, snapshot: RunSnapshot, step_interval: int = 1) -> bool:
+        """判断此次快照是否需要触发分析。
+
+        step_interval=1（默认）：每检测到新 step 即触发。
+        step_interval=N（N>1）：仅当距上次触发分析的 step 差值 >= N 时才触发。
+        """
         last = self._last_steps.get(exp_name, -1)
-        if snapshot.latest_step > last:
-            self._last_steps[exp_name] = snapshot.latest_step
+        if snapshot.latest_step <= last:
+            return False
+        # 有新 step，更新已知最新 step
+        self._last_steps[exp_name] = snapshot.latest_step
+
+        last_analysis = self._last_analysis_steps.get(exp_name, -1)
+        if step_interval <= 1 or (snapshot.latest_step - last_analysis) >= step_interval:
+            self._last_analysis_steps[exp_name] = snapshot.latest_step
             return True
         return False
 

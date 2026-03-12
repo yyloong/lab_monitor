@@ -67,6 +67,7 @@ class ScheduleConfig:
     process_interval_seconds: int = 30
     wandb_interval_seconds: int = 30
     wandb_step_check: bool = True
+    wandb_step_check_interval: int = 1  # 每隔多少个 step 触发一次 LLM 分析，1 表示每步都触发
     alert_cooldown_minutes: int = 10
     gpu_report_interval_minutes: int = 30
 
